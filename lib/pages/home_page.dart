@@ -15,7 +15,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-
+   var isLoading = false;
    List<Post> items = [];
    
    @override
@@ -38,6 +38,9 @@ class _HomePageState extends State<HomePage> {
   }
 
   _apiGetPosts() async{
+     setState(() {
+       isLoading = true;
+     });
    var id = await Prefs.loadUserId();
    RTDBService.getPosts(id).then((post) => {
      _respPosts(post)
@@ -46,6 +49,7 @@ class _HomePageState extends State<HomePage> {
 
   _respPosts(List<Post> posts){
      setState(() {
+       isLoading = false;
        items = posts;
      });
   }
@@ -63,11 +67,19 @@ class _HomePageState extends State<HomePage> {
           )
         ],
       ),
-      body: ListView.builder(
-        itemCount: items.length,
-        itemBuilder: (ctx, i){
-          return itemOfList(items[i]);
-        },
+      body: Stack(
+        children: [
+          ListView.builder(
+            itemCount: items.length,
+            itemBuilder: (ctx, i){
+              return itemOfList(items[i]);
+            },
+          ),
+          isLoading ? Center(
+            child: CircularProgressIndicator(),
+          ):
+              SizedBox.shrink()
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         child: IconButton(
@@ -81,14 +93,26 @@ class _HomePageState extends State<HomePage> {
   Widget itemOfList(Post post){
      return  Container(
        padding: EdgeInsets.all(20),
-       child: Column(
-         crossAxisAlignment: CrossAxisAlignment.start,
+       child: Row(
          children: [
-           Text(post.title, style: TextStyle(color: Colors.black, fontSize: 20),),
-           SizedBox(height: 10,),
-           Text(post.content, style: TextStyle(color: Colors.black, fontSize: 16),),
+           Container(
+             height: 70,
+             width: 70,
+             child: post.img_url != null ?
+             Image.network(post.img_url, fit: BoxFit.cover,):
+             Image.asset("assets/images/ic_default.jpg"),
+           ),
+           SizedBox(width: 15,),
+           Column(
+             crossAxisAlignment: CrossAxisAlignment.start,
+             children: [
+               Text(post.title, style: TextStyle(color: Colors.black, fontSize: 20),),
+               SizedBox(height: 10,),
+               Text(post.content, style: TextStyle(color: Colors.black, fontSize: 16),),
+             ],
+           ),
          ],
-       ),
+       )
      );
   }
 }

@@ -2,6 +2,7 @@
     package="com.example.firepost">
    <application
         android:label="firepost"
+        android:requestLegacyExternalStorage="true"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"
